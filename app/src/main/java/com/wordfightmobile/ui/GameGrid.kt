@@ -30,7 +30,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.wordfightmobile.R
 import com.wordfightmobile.data.Block
@@ -40,7 +39,7 @@ import com.wordfightmobile.viewModels.GamesViewModel
 enum class GridSize { Small, Large}
 
 @Composable
-fun GameGrid(blocks: List<Block>, size: GridSize,clickEnabled: Boolean = false) {
+fun GameGrid(blocks: List<Block>, size: GridSize,clickEnabled: Boolean = false, onClick: () -> Unit = {}) {
     val authViewModel : AuthViewModel = viewModel()
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         for (i in 0..20 step 5) {
@@ -50,7 +49,8 @@ fun GameGrid(blocks: List<Block>, size: GridSize,clickEnabled: Boolean = false) 
                         it,
                         authViewModel.uid.toString(),
                         gridSize = size,
-                        clickEnabled = clickEnabled
+                        clickEnabled = clickEnabled,
+                        onClick = onClick
                     )
                 }
             }
@@ -59,7 +59,7 @@ fun GameGrid(blocks: List<Block>, size: GridSize,clickEnabled: Boolean = false) 
 }
 
 @Composable
-fun BlockView(block: Block, user: String, modifier: Modifier = Modifier, gridSize: GridSize = GridSize.Large, clickEnabled: Boolean = false) {
+fun BlockView(block: Block, user: String, modifier: Modifier = Modifier, gridSize: GridSize = GridSize.Large, clickEnabled: Boolean = false, onClick: () -> Unit = {}) {
     var clicked by remember {mutableStateOf(block.clicked)}
     val gamesViewModel : GamesViewModel = viewModel()
     val context = LocalContext.current
@@ -88,6 +88,8 @@ fun BlockView(block: Block, user: String, modifier: Modifier = Modifier, gridSiz
                     gamesViewModel.currentWord.remove(block)
                 }
                 clicked = !clicked
+            } else {
+                onClick() // so that the grid can override the click behavior if need be.
             }
         })
     ) {

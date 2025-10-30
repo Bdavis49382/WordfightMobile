@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 import com.google.firebase.functions.functions
 import com.wordfightmobile.data.Block
@@ -22,7 +23,6 @@ class GamesViewModel : ViewModel() {
     val games = mutableStateListOf<Game>()
     var gameId : MutableState<String?> = mutableStateOf(null)
     val currentGame = derivedStateOf {
-        Log.d("gameId",gameId.value.toString())
         games.find { it.id == gameId.value && gameId.value != null}
     }
     val currentWord = mutableStateListOf<Block>()
@@ -30,11 +30,15 @@ class GamesViewModel : ViewModel() {
 
     fun getGames() {
         scope.launch {
-            db.collection("games").addSnapshotListener { docs,e ->
+            db.collection("games").orderBy("lastMove", Query.Direction.DESCENDING).addSnapshotListener { docs,e ->
                 games.clear()
                 docs?.forEach { doc ->
                     val game = doc.toObject<Game>(Game::class.java)
                     games.add(game.copy(id=doc.id))
+                }
+                games.sortBy { it.turn != auth.uid }
+                if (games.isNotEmpty() && games.first().turn == auth.uid) {
+                    gameId.value = games.first().id
                 }
             }
         }

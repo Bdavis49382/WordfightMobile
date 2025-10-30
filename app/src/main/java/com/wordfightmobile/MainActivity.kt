@@ -3,22 +3,28 @@ package com.wordfightmobile
 import android.os.Build
 import androidx.credentials.CredentialManager
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,13 +72,18 @@ class MainActivity : ComponentActivity() {
             val gamesViewModel: GamesViewModel = viewModel()
             val context = LocalContext.current
             val credentialManager = CredentialManager.create(context)
+            val scaffoldState = rememberBottomSheetScaffoldState()
+            val homeGrid = homeGrid()
+            val hasGame by remember {
+                derivedStateOf {
+                    gamesViewModel.gameId.value != null
+                }
+            }
             LaunchedEffect(Unit) {
                 if (authViewModel.checkLogin()) {
-                    Log.d("user", authViewModel.uid.toString())
                     gamesViewModel.getGames()
                 } else {
                     authViewModel.login(scope, credentialManager, context) {
-                        Log.d("user", authViewModel.uid.toString())
                         gamesViewModel.getGames()
                     }
                 }
@@ -81,19 +92,28 @@ class MainActivity : ComponentActivity() {
             }
             WordfightMobileTheme {
                 MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColors else lightColors) {
-                    BottomSheetScaffold(sheetContent = {
-                            GamesSheet()
+                    BottomSheetScaffold(
+                        scaffoldState = scaffoldState,
+                        sheetContent = {
+                            GamesSheet(scaffoldState)
                         },
                         sheetPeekHeight = 220.dp,
                         modifier = Modifier.fillMaxSize()) { innerPadding ->
-                        Column(modifier = Modifier.padding(innerPadding), verticalArrangement = Arrangement.Center,
+                        Column(modifier = Modifier.padding(innerPadding),
                             horizontalAlignment =  Alignment.CenterHorizontally
                             ) {
-                            if (gamesViewModel.currentGame.value == null) {
-                                GameGrid(homeGrid(), GridSize.Large, clickEnabled = false)
-                            }
-                            gamesViewModel.currentGame.value?.let { game ->
-                                GameScreen(game)
+                            Spacer(modifier = Modifier.height(150.dp))
+                            Crossfade(hasGame, animationSpec = tween(3000, delayMillis = 400)) { hasGame ->
+                                if (!hasGame) {
+                                    Column {
+                                        Spacer(modifier = Modifier.height(40.dp))
+                                        GameGrid(homeGrid, GridSize.Large, clickEnabled = false)
+                                    }
+                                } else {
+                                    gamesViewModel.currentGame.value?.let { currentGame ->
+                                        GameScreen(currentGame)
+                                    }
+                                }
                             }
                         }
                     }
