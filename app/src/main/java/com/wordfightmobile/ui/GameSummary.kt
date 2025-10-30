@@ -61,8 +61,12 @@ fun GameSummary(game: Game, scaffoldState: BottomSheetScaffoldState) {
         }
         Column {
             Text(if (game.players[0] == authViewModel.uid) game.playerNames[1] else game.playerNames[0])
-            Text(if (game.turn == authViewModel.uid) "Your Turn" else "Their Turn")
-            Text("Last Move: " + formatDate(game.lastMove.toInstant()))
+            if (game.finished) {
+                Text("Game finished " + formatDate(game.lastMove.toInstant()))
+            } else {
+                Text(if (game.turn == authViewModel.uid) "Your Turn" else "Their Turn")
+                Text("Last Move: " + formatDate(game.lastMove.toInstant()))
+            }
         }
     }
 }

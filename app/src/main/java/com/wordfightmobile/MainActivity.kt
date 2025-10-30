@@ -90,8 +90,6 @@ class MainActivity : ComponentActivity() {
                         gamesViewModel.getGames()
                     }
                 }
-//                authViewModel.logout(credentialManager)
-
             }
             WordfightMobileTheme {
                 MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColors else lightColors) {
@@ -118,11 +116,11 @@ class MainActivity : ComponentActivity() {
                                     "Log Out"
                                 )
                             }
-                            Spacer(modifier = Modifier.height(100.dp))
+                            Spacer(modifier = Modifier.height(80.dp))
                             Crossfade(hasGame, animationSpec = tween(4000, delayMillis = 600)) { hasGame ->
                                 if (!hasGame) {
                                     Column {
-                                        Spacer(modifier = Modifier.height(40.dp))
+                                        Spacer(modifier = Modifier.height(70.dp))
                                         GameGrid(homeGrid, GridSize.Large, clickEnabled = false)
                                     }
                                 } else {

@@ -6,43 +6,46 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
+import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.functions.functions
 import com.wordfightmobile.data.Block
 import com.wordfightmobile.data.Game
-import kotlinx.coroutines.launch
 
 class GamesViewModel : ViewModel() {
     private var functions = Firebase.functions
     private var db = Firebase.firestore
     private var auth = Firebase.auth
+    private var listenerRegistration: ListenerRegistration? = null
     val games = mutableStateListOf<Game>()
     var gameId : MutableState<String?> = mutableStateOf(null)
     val currentGame = derivedStateOf {
         games.find { it.id == gameId.value && gameId.value != null}
     }
     val currentWord = mutableStateListOf<Block>()
-    val scope = viewModelScope
 
     fun getGames() {
-        scope.launch {
-            db.collection("games")
-                .whereArrayContains("players",auth.uid.toString())
-                .orderBy("lastMove", Query.Direction.DESCENDING).addSnapshotListener { docs,e ->
+        listenerRegistration?.remove()
+        listenerRegistration = null
+        listenerRegistration = db.collection("games")
+            .whereArrayContains("players",auth.uid.toString())
+            .orderBy("lastMove", Query.Direction.DESCENDING).addSnapshotListener { docs,e ->
                 games.clear()
                 docs?.forEach { doc ->
                     val game = doc.toObject<Game>(Game::class.java)
                     games.add(game.copy(id=doc.id))
                 }
                 games.sortBy { it.turn != auth.uid }
-                if (games.isNotEmpty() && games.first().turn == auth.uid) {
+                if (gameId.value == null && games.isNotEmpty() && games.first().turn == auth.uid) {
                     gameId.value = games.first().id
                 }
-            }
+                if (e != null) {
+                    return@addSnapshotListener
+                }
         }
     }
     fun createGame(opponent: String = "opponent", opponentName: String = "opponent") {
@@ -58,12 +61,13 @@ class GamesViewModel : ViewModel() {
                 val result = task.result?.data as Map<String, *>
                 gameId.value = result["id"] as String
                 currentWord.clear()
-                Log.d("newgame", gameId.value.toString())
             }
     }
-    fun submitWord() {
-        if (currentWord.isEmpty()) return
-        Log.d("function","calling...")
+    fun submitWord(onFail: (String) -> Unit) {
+        if (currentWord.isEmpty()) {
+            onFail("No Word Submitted")
+            return
+        }
         functions.getHttpsCallable("submit_word")
             .call(
                 hashMapOf(
@@ -76,9 +80,22 @@ class GamesViewModel : ViewModel() {
                     ) }
                 )
             ).continueWith { task ->
-                val result = task.result?.data as Map<String, *>
+                if (!task.isSuccessful) {
+                    val e = task.exception
+                    if (e is FirebaseFunctionsException) {
+                        if (e.code.name == "INVALID_ARGUMENT") {
+                            onFail(e.message.toString())
+                        }
+                    } else {
+                        Log.e("submission",e.toString())
+                    }
+                }
                 currentWord.clear()
-                Log.d("newgame", result.toString())
             }
+    }
+
+    override fun onCleared() {
+        listenerRegistration?.remove()
+        listenerRegistration = null
     }
 }
