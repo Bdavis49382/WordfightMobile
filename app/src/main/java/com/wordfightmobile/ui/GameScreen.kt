@@ -1,5 +1,6 @@
 package com.wordfightmobile.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -25,6 +27,7 @@ import com.wordfightmobile.viewModels.GamesViewModel
 fun GameScreen(game: Game) {
     val gamesViewModel: GamesViewModel = viewModel()
     val authViewModel : AuthViewModel = viewModel()
+    val context = LocalContext.current
     val isTurn by remember { derivedStateOf {
         game.turn == authViewModel.uid
     } }
@@ -48,6 +51,7 @@ fun GameScreen(game: Game) {
         if (isTurn) {
             Button({
                 gamesViewModel.submitWord()
+                Toast.makeText(context, "Submitting...", Toast.LENGTH_LONG).show()
             }) {
                 Text("Submit")
             }

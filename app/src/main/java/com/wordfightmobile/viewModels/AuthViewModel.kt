@@ -97,6 +97,7 @@ class AuthViewModel: ViewModel() {
                             db.collection("users").document(auth.uid.toString()).set(mapOf("name" to auth.currentUser?.displayName))
                         }
                     }
+                    uid = task.result.user?.uid
                     after()
                 }
             }

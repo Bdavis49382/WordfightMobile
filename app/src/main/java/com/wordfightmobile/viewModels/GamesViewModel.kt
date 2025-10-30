@@ -30,7 +30,9 @@ class GamesViewModel : ViewModel() {
 
     fun getGames() {
         scope.launch {
-            db.collection("games").orderBy("lastMove", Query.Direction.DESCENDING).addSnapshotListener { docs,e ->
+            db.collection("games")
+                .whereArrayContains("players",auth.uid.toString())
+                .orderBy("lastMove", Query.Direction.DESCENDING).addSnapshotListener { docs,e ->
                 games.clear()
                 docs?.forEach { doc ->
                     val game = doc.toObject<Game>(Game::class.java)
