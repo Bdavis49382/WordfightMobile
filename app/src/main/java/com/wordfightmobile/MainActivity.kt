@@ -43,6 +43,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
 import com.wordfightmobile.data.Block
 import com.wordfightmobile.ui.GameGrid
 import com.wordfightmobile.ui.GameScreen
@@ -106,6 +107,16 @@ class MainActivity : ComponentActivity() {
                 } else {
                     authViewModel.login(scope, credentialManager, context) {
                         gamesViewModel.getGames()
+                        val prefs = getSharedPreferences("fcm",MODE_PRIVATE)
+                        val token = prefs.getString("pendingFCMToken", null)
+                        if (token != null) {
+                            val db = Firebase.firestore
+                            val auth = Firebase.auth
+                            auth.uid?.let { uid ->
+                                db.collection("users").document(uid).update(
+                                    mapOf("FCMToken" to token))
+                            }
+                        }
                     }
                 }
             }

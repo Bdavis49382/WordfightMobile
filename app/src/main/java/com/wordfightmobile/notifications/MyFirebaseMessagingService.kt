@@ -13,10 +13,13 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.wordfightmobile.MainActivity
 import com.wordfightmobile.R
+import androidx.core.content.edit
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        val prefs = getSharedPreferences("fcm", MODE_PRIVATE)
+        prefs.edit { putString("pendingFCMToken", token) }
         updateTokenInFirestore(token)
     }
 
