@@ -1,5 +1,10 @@
 package com.wordfightmobile
 
+import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.credentials.CredentialManager
 import android.os.Bundle
@@ -33,6 +38,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -47,9 +54,18 @@ import com.wordfightmobile.viewModels.GamesViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @OptIn(ExperimentalMaterial3Api::class)
-    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
+        val permissionState = ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+        if (permissionState != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                1
+            )
+        }
+
         val darkColors = darkColorScheme(
             primaryContainer = Color(0xFFD3AE61),
             onPrimaryContainer = Color.Black,
@@ -68,6 +84,7 @@ class MainActivity : ComponentActivity() {
         )
 
         super.onCreate(savedInstanceState)
+        createNotificationChannel()
         enableEdgeToEdge()
         setContent {
             val scope = rememberCoroutineScope()
@@ -83,6 +100,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             LaunchedEffect(Unit) {
+                handleIntents((context as? Activity)?.intent, {gamesViewModel.gameId.value = it})
                 if (authViewModel.checkLogin()) {
                     gamesViewModel.getGames()
                 } else {
@@ -146,4 +164,25 @@ class MainActivity : ComponentActivity() {
         }
         return grid
     }
+
+    fun handleIntents(intent: Intent?, openGame: (String) -> Unit) {
+        intent?.let {
+            it.getStringExtra("gameId")?.let {
+                openGame(it)
+            }
+        }
+    }
+
+    fun createNotificationChannel() {
+        val channel = NotificationChannel(
+            "turn_reminder_channel",
+            "Turn Reminders",
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        channel.description = "Used for turn reminders"
+
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
 }
