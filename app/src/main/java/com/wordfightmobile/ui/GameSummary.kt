@@ -20,20 +20,20 @@ import com.wordfightmobile.viewModels.GamesViewModel
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
+import kotlin.time.toKotlinDuration
 
-@RequiresApi(Build.VERSION_CODES.S)
 fun formatDate(lastMove: Instant): String {
-    val timeSince = Duration.between(lastMove, Instant.now())
-    return if (timeSince.toMinutes() < 2) {
+    val timeSince = Duration.between(lastMove, Instant.now()).toKotlinDuration()
+    return if (timeSince.inWholeMinutes < 2) {
        "Now"
-    } else if (timeSince.toHours() < 1) {
-        "${timeSince.toMinutesPart()} minutes ago"
-    } else if (timeSince.toDays() < 1) {
-       "${timeSince.toHoursPart()} hours and ${timeSince.toMinutesPart()} minutes ago"
-    } else if (timeSince.toDays() < 7) {
-       "${timeSince.toDaysPart()} days and ${timeSince.toHoursPart()} hours ago"
-    } else if (timeSince.toDays() < 365) {
-       "${timeSince.toDays()/7} weeks and ${timeSince.toDays()%7} days ago"
+    } else if (timeSince.inWholeHours < 1) {
+        "${timeSince.inWholeMinutes} minutes ago"
+    } else if (timeSince.inWholeDays < 1) {
+       "${timeSince.inWholeHours} hours and ${timeSince.inWholeMinutes % 60} minutes ago"
+    } else if (timeSince.inWholeDays < 7) {
+       "${timeSince.inWholeDays} days and ${timeSince.inWholeHours % 24} hours ago"
+    } else if (timeSince.inWholeDays < 365) {
+       "${timeSince.inWholeDays/7} weeks and ${timeSince.inWholeDays%7} days ago"
     } else {
        "Over a year ago"
     }

@@ -21,10 +21,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -52,7 +50,12 @@ import com.wordfightmobile.ui.GridSize
 import com.wordfightmobile.ui.theme.WordfightMobileTheme
 import com.wordfightmobile.viewModels.AuthViewModel
 import com.wordfightmobile.viewModels.GamesViewModel
-import kotlinx.coroutines.launch
+import android.net.Uri
+import com.wordfightmobile.ui.AcceptFriendAlert
+import com.wordfightmobile.ui.CreateGameAlert
+import com.wordfightmobile.ui.FriendsAlert
+import com.wordfightmobile.viewModels.FriendsViewModel
+import com.wordfightmobile.viewModels.OpenAlert
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -91,6 +94,7 @@ class MainActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
             val authViewModel: AuthViewModel = viewModel()
             val gamesViewModel: GamesViewModel = viewModel()
+            val friendsViewModel: FriendsViewModel = viewModel()
             val context = LocalContext.current
             val credentialManager = CredentialManager.create(context)
             val scaffoldState = rememberBottomSheetScaffoldState()
@@ -101,7 +105,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
             LaunchedEffect(Unit) {
-                handleIntents((context as? Activity)?.intent, {gamesViewModel.gameId.value = it})
+                handleIntents((context as? Activity)?.intent, {gamesViewModel.gameId.value = it}) {
+                    friendsViewModel.acceptInviteCode(it)
+                    friendsViewModel.openAlert.value = OpenAlert.ConfirmFriendship
+                }
                 if (authViewModel.checkLogin()) {
                     gamesViewModel.getGames()
                 } else {
@@ -113,8 +120,9 @@ class MainActivity : ComponentActivity() {
                             val db = Firebase.firestore
                             val auth = Firebase.auth
                             auth.uid?.let { uid ->
+                                val img = auth.currentUser?.photoUrl
                                 db.collection("users").document(uid).update(
-                                    mapOf("FCMToken" to token))
+                                    mapOf("FCMToken" to token,"img" to img))
                             }
                         }
                     }
@@ -129,22 +137,31 @@ class MainActivity : ComponentActivity() {
                         },
                         sheetPeekHeight = 220.dp,
                         modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        when (friendsViewModel.openAlert.value) {
+                            OpenAlert.ConfirmFriendship -> AcceptFriendAlert { friendsViewModel.openAlert.value =
+                                OpenAlert.None
+                            }
+                            OpenAlert.None -> {}
+                            OpenAlert.Friends ->
+                                FriendsAlert { friendsViewModel.openAlert.value = OpenAlert.None }
+                            OpenAlert.CreateGame -> CreateGameAlert()
+                        }
                         Column(modifier = Modifier.padding(innerPadding),
                             horizontalAlignment =  Alignment.CenterHorizontally
-                            ) {
-                            Button({
-                                scope.launch {
-                                    authViewModel.logout(credentialManager)
-                                    authViewModel.login(scope,credentialManager,context) {
-                                        gamesViewModel.getGames()
-                                        gamesViewModel.gameId.value = null
-                                    }
-                                } },
-                                modifier = Modifier.padding(top = 50.dp)) {
-                                Text(
-                                    "Log Out"
-                                )
-                            }
+                        ) {
+//                            Button({
+//                                scope.launch {
+//                                    authViewModel.logout(credentialManager)
+//                                    authViewModel.login(scope,credentialManager,context) {
+//                                        gamesViewModel.getGames()
+//                                        gamesViewModel.gameId.value = null
+//                                    }
+//                                } },
+//                                modifier = Modifier.padding(top = 50.dp)) {
+//                                Text(
+//                                    "Log Out"
+//                                )
+//                            }
                             Spacer(modifier = Modifier.height(80.dp))
                             Crossfade(hasGame, animationSpec = tween(4000, delayMillis = 600)) { hasGame ->
                                 if (!hasGame) {
@@ -176,11 +193,17 @@ class MainActivity : ComponentActivity() {
         return grid
     }
 
-    fun handleIntents(intent: Intent?, openGame: (String) -> Unit) {
+    fun handleIntents(intent: Intent?, openGame: (String) -> Unit, openFriendConfirmation: (String) -> Unit) {
         intent?.let {
             it.getStringExtra("gameId")?.let {
                 openGame(it)
             }
+            val appLinkData: Uri? = it.data
+            val code = appLinkData?.getQueryParameter("code")
+            if (code != null) {
+                openFriendConfirmation(code)
+            }
+
         }
     }
 

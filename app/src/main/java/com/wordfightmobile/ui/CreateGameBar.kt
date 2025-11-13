@@ -19,7 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.wordfightmobile.viewModels.FriendsViewModel
 import com.wordfightmobile.viewModels.GamesViewModel
+import com.wordfightmobile.viewModels.OpenAlert
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,6 +29,7 @@ import kotlinx.coroutines.launch
 fun CreateGameBar(scaffoldState: BottomSheetScaffoldState) {
     val scope = rememberCoroutineScope()
     val viewModel : GamesViewModel = viewModel()
+    val nav: FriendsViewModel = viewModel()
     val context = LocalContext.current
 
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -42,9 +45,7 @@ fun CreateGameBar(scaffoldState: BottomSheetScaffoldState) {
         }
         VerticalDivider(color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.height(60.dp).padding(horizontal = 10.dp))
         Button({
-            scope.launch {
-                Toast.makeText(context, "Not implemented yet.", Toast.LENGTH_LONG).show()
-            }
+            nav.openAlert.value = OpenAlert.Friends
         }) {
             Text(
                 text = "Play Against A Friend")

@@ -13,8 +13,8 @@ android {
         applicationId = "com.wordfightmobile"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "Internal 3"
+        versionCode = 4
+        versionName = "Internal 4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -58,6 +58,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.coil.compose)
+//    implementation(libs.coil.network.okhttp)
 
     implementation(platform(libs.firebase.bom))
 
