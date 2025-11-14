@@ -165,7 +165,7 @@ class MainActivity : ComponentActivity() {
 //                                )
 //                            }
                             Spacer(modifier = Modifier.height(80.dp))
-                            Crossfade(hasGame, animationSpec = tween(4000, delayMillis = 600)) { hasGame ->
+                            Crossfade(hasGame, animationSpec = tween(4300, delayMillis = 300)) { hasGame ->
                                 if (!hasGame) {
                                     Column {
                                         Spacer(modifier = Modifier.height(70.dp))

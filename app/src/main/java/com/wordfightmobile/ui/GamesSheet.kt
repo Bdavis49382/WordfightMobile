@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +43,7 @@ import com.wordfightmobile.viewModels.GamesViewModel
 fun GamesSheet(scaffoldState: BottomSheetScaffoldState) {
     val viewModel : GamesViewModel = viewModel()
     var showFinished by remember { mutableStateOf(false) }
+    val lazyListState = rememberLazyListState()
     val hasGames by remember {
         derivedStateOf {
             viewModel.games.isNotEmpty()
@@ -55,8 +57,9 @@ fun GamesSheet(scaffoldState: BottomSheetScaffoldState) {
     Box(modifier = Modifier.fillMaxHeight(.95f)) {
         Crossfade(hasGames, animationSpec = tween(700)) {
             if (it) {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(20.dp),
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(22.dp),
                     horizontalAlignment = Alignment.Start,
+                    state = lazyListState,
                     modifier = Modifier.padding(0.dp)) {
                     item {
                         Text("Games", fontSize = 25.sp,
@@ -64,7 +67,7 @@ fun GamesSheet(scaffoldState: BottomSheetScaffoldState) {
                             modifier = Modifier.fillMaxWidth())
                     }
                     items(finishedGames.second, key = {it.id?:it.lastMove.toString()}) {
-                        GameSummary(it, scaffoldState)
+                        GameSummary(it, scaffoldState, lazyListState)
                     }
                     item {
                         CreateGameBar(scaffoldState)
@@ -89,7 +92,7 @@ fun GamesSheet(scaffoldState: BottomSheetScaffoldState) {
                         }
                     }
                     items(finishedGames.first.takeWhile { showFinished }, key = {it.id?:it.lastMove.toString()}) {
-                        GameSummary(it, scaffoldState, modifier = Modifier.animateItem())
+                        GameSummary(it, scaffoldState, lazyListState, modifier = Modifier.animateItem())
                     }
                     item {
                         Spacer(modifier = Modifier.height(50.dp))

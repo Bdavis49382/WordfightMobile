@@ -45,6 +45,9 @@ fun CreateGameBar(scaffoldState: BottomSheetScaffoldState) {
         }
         VerticalDivider(color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.height(60.dp).padding(horizontal = 10.dp))
         Button({
+            scope.launch {
+                scaffoldState.bottomSheetState.partialExpand()
+            }
             nav.openAlert.value = OpenAlert.Friends
         }) {
             Text(

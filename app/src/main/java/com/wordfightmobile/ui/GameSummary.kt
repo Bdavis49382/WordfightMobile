@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -42,7 +43,10 @@ fun formatDate(lastMove: Instant): String {
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun GameSummary(game: Game, scaffoldState: BottomSheetScaffoldState, modifier: Modifier = Modifier) {
+fun GameSummary(game: Game,
+                scaffoldState: BottomSheetScaffoldState,
+                lazyListState: LazyListState,
+                modifier: Modifier = Modifier) {
     val authViewModel : AuthViewModel = viewModel()
     val gamesViewModel : GamesViewModel = viewModel()
     val scope = rememberCoroutineScope()
@@ -51,6 +55,7 @@ fun GameSummary(game: Game, scaffoldState: BottomSheetScaffoldState, modifier: M
         gamesViewModel.currentWord.clear()
         scope.launch {
             scaffoldState.bottomSheetState.partialExpand()
+            lazyListState.animateScrollToItem(0)
         }
     }
     Row(modifier = modifier.fillMaxWidth(.95f)

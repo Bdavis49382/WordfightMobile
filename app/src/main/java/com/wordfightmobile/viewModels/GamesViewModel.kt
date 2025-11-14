@@ -40,7 +40,7 @@ class GamesViewModel : ViewModel() {
                     games.add(game.copy(id=doc.id))
                 }
                 games.sortBy { it.turn != auth.uid }
-                if (gameId.value == null && games.isNotEmpty() && games.first().turn == auth.uid) {
+                if (gameId.value == null && games.isNotEmpty() && games.first().turn == auth.uid && games.first().finished == false) {
                     gameId.value = games.first().id
                 }
                 if (e != null) {
