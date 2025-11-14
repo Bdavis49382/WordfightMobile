@@ -89,8 +89,9 @@ class GamesViewModel : ViewModel() {
                     } else {
                         Log.e("submission",e.toString())
                     }
+                } else {
+                    currentWord.clear()
                 }
-                currentWord.clear()
             }
     }
 

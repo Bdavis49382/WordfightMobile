@@ -52,7 +52,7 @@ fun GamesSheet(scaffoldState: BottomSheetScaffoldState) {
             viewModel.games.partition { it.finished }
         }
     }
-    Box(modifier = Modifier.fillMaxHeight()) {
+    Box(modifier = Modifier.fillMaxHeight(.95f)) {
         Crossfade(hasGames, animationSpec = tween(700)) {
             if (it) {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(20.dp),
