@@ -24,11 +24,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.wordfightmobile.data.Game
 import com.wordfightmobile.viewModels.AuthViewModel
+import com.wordfightmobile.viewModels.FriendsViewModel
 import com.wordfightmobile.viewModels.GamesViewModel
+import com.wordfightmobile.viewModels.OpenAlert
 
 @Composable
 fun GameScreen(game: Game) {
     val gamesViewModel: GamesViewModel = viewModel()
+    val friendsViewModel: FriendsViewModel = viewModel()
     val authViewModel : AuthViewModel = viewModel()
     val context = LocalContext.current
 
@@ -68,6 +71,16 @@ fun GameScreen(game: Game) {
             } else {
                 if (game.finished) {
                     Text("Game Over", fontSize = 20.sp)
+                    Button({
+                        val index = game.players.indexOf(authViewModel.uid.toString())
+                        if (index != -1) {
+                            // load the information for the other player
+                            friendsViewModel.setFriend(game.players[(index + 1) % 2],game.playerNames[(index + 1) % 2])
+                            friendsViewModel.openAlert.value = OpenAlert.CreateGame
+                        }
+                    }) {
+                        Text("Rematch")
+                    }
                 } else {
                     Text("Waiting", fontSize = 20.sp)
                 }

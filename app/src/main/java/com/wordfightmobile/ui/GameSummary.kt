@@ -42,7 +42,7 @@ fun formatDate(lastMove: Instant): String {
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun GameSummary(game: Game, scaffoldState: BottomSheetScaffoldState) {
+fun GameSummary(game: Game, scaffoldState: BottomSheetScaffoldState, modifier: Modifier = Modifier) {
     val authViewModel : AuthViewModel = viewModel()
     val gamesViewModel : GamesViewModel = viewModel()
     val scope = rememberCoroutineScope()
@@ -53,7 +53,8 @@ fun GameSummary(game: Game, scaffoldState: BottomSheetScaffoldState) {
             scaffoldState.bottomSheetState.partialExpand()
         }
     }
-    Row(modifier = Modifier.fillMaxWidth(.95f).clickable {
+    Row(modifier = modifier.fillMaxWidth(.95f)
+        .clickable {
         onClick()
     }) {
         Box(modifier = Modifier.fillMaxWidth(.4f)) {

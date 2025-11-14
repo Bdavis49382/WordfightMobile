@@ -105,7 +105,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
             LaunchedEffect(Unit) {
-                handleIntents((context as? Activity)?.intent, {gamesViewModel.gameId.value = it}) {
+                handleIntents((context as? Activity)?.intent, openGame = { gameId ->
+                    gamesViewModel.gameId.value = gameId
+                }) {
                     friendsViewModel.acceptInviteCode(it)
                     friendsViewModel.openAlert.value = OpenAlert.ConfirmFriendship
                 }

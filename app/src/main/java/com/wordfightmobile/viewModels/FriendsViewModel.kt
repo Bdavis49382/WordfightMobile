@@ -49,13 +49,17 @@ class FriendsViewModel: ViewModel() {
                 val player = data.first()
                 val uid = Firebase.auth.uid.toString()
                 if (player.id != uid) {
-                    friendName.value = player.get("name").toString()
-                    friendId.value = player.id
+                    setFriend(player.id,player.get("name").toString())
                     users.document(uid).update("friends", FieldValue.arrayUnion(player.id))
                     users.document(player.id).update("friends", FieldValue.arrayUnion(uid))
                 }
             }
         }
+    }
+
+    fun setFriend(id: String, name: String) {
+        friendId.value = id
+        friendName.value = name
     }
 
     fun getFriends(uid: String) {
