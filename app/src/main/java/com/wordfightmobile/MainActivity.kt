@@ -54,8 +54,10 @@ import android.net.Uri
 import com.wordfightmobile.ui.AcceptFriendAlert
 import com.wordfightmobile.ui.CreateGameAlert
 import com.wordfightmobile.ui.FriendsAlert
+import com.wordfightmobile.ui.TutorialAlert
 import com.wordfightmobile.viewModels.FriendsViewModel
 import com.wordfightmobile.viewModels.OpenAlert
+import com.wordfightmobile.viewModels.TutorialViewModel
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -95,6 +97,7 @@ class MainActivity : ComponentActivity() {
             val authViewModel: AuthViewModel = viewModel()
             val gamesViewModel: GamesViewModel = viewModel()
             val friendsViewModel: FriendsViewModel = viewModel()
+            val tutorialViewModel: TutorialViewModel = viewModel()
             val context = LocalContext.current
             val credentialManager = CredentialManager.create(context)
             val scaffoldState = rememberBottomSheetScaffoldState()
@@ -147,6 +150,9 @@ class MainActivity : ComponentActivity() {
                             OpenAlert.Friends ->
                                 FriendsAlert { friendsViewModel.openAlert.value = OpenAlert.None }
                             OpenAlert.CreateGame -> CreateGameAlert()
+                        }
+                        if (tutorialViewModel.open.value) {
+                            TutorialAlert()
                         }
                         Column(modifier = Modifier.padding(innerPadding),
                             horizontalAlignment =  Alignment.CenterHorizontally

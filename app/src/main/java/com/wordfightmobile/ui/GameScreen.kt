@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -27,13 +28,22 @@ import com.wordfightmobile.viewModels.AuthViewModel
 import com.wordfightmobile.viewModels.FriendsViewModel
 import com.wordfightmobile.viewModels.GamesViewModel
 import com.wordfightmobile.viewModels.OpenAlert
+import com.wordfightmobile.viewModels.TutorialViewModel
 
 @Composable
 fun GameScreen(game: Game) {
     val gamesViewModel: GamesViewModel = viewModel()
     val friendsViewModel: FriendsViewModel = viewModel()
     val authViewModel : AuthViewModel = viewModel()
+    val tutorialViewModel: TutorialViewModel = viewModel()
     val context = LocalContext.current
+
+    LaunchedEffect(gamesViewModel.currentGame.value?.id) {
+        if (gamesViewModel.games.size == 1 && game.usedWords.isEmpty()) {
+            tutorialViewModel.getSlides()
+            tutorialViewModel.open.value = true
+        }
+    }
 
     Crossfade(gamesViewModel.currentGame.value?.turn) { turn ->
         Column(
