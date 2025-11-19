@@ -39,7 +39,7 @@ import com.wordfightmobile.viewModels.GamesViewModel
 enum class GridSize { Small, Large}
 
 @Composable
-fun GameGrid(blocks: List<Block>, size: GridSize,clickEnabled: Boolean = false, onClick: () -> Unit = {}) {
+fun GameGrid(blocks: List<Block>, size: GridSize,clickEnabled: Boolean = false, user: String? = null, onClick: () -> Unit = {}) {
     val authViewModel : AuthViewModel = viewModel()
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         for (i in 0..20 step 5) {
@@ -47,7 +47,7 @@ fun GameGrid(blocks: List<Block>, size: GridSize,clickEnabled: Boolean = false, 
                 blocks.subList(i, i + 5).forEach {
                     BlockView(
                         it,
-                        authViewModel.uid.toString(),
+                        user ?: authViewModel.uid.toString(),
                         gridSize = size,
                         clickEnabled = clickEnabled,
                         onClick = onClick

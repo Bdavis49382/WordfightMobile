@@ -175,7 +175,7 @@ class MainActivity : ComponentActivity() {
                                 if (!hasGame) {
                                     Column {
                                         Spacer(modifier = Modifier.height(70.dp))
-                                        GameGrid(homeGrid, GridSize.Large, clickEnabled = false)
+                                        GameGrid(homeGrid, GridSize.Large, clickEnabled = false, user = "user")
                                     }
                                 } else {
                                     gamesViewModel.currentGame.value?.let { currentGame ->
@@ -193,7 +193,7 @@ class MainActivity : ComponentActivity() {
         val dice = listOf<String>("AAEEGN","ELRTTY","AOOTTW","ABBJOO","EHRTVW","CIMOTU","DISTTY","EIOSST","DELRVY","ACHOPS","HIMNQU","EEINSU","EEGHNW","AFFKPS","HLNNRZ","DEILRX","AAEEGN","ACHOPS","AFFKPS","DEILRX","DELRVY","EEGHNW","EIOSST","HIMNQU","HLNNRZ")
         val grid = dice.shuffled().mapIndexed { i,die ->  Block(letter=die.random().toString(),i, clicked = true) }.toMutableList()
         "WORD".forEachIndexed { i,letter ->
-            grid[5+i]= grid[5+i].copy(letter = letter.toString(), allegiance = Firebase.auth.uid.toString(), clicked = false)
+            grid[5+i]= grid[5+i].copy(letter = letter.toString(), allegiance = "user", clicked = false)
         }
         "FIGHT".forEachIndexed { i,letter ->
             grid[10+i]= grid[10+i].copy(letter = letter.toString(), allegiance = "notUser", clicked = false)
