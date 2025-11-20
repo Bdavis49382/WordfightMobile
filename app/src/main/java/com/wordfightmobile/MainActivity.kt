@@ -1,5 +1,6 @@
 package com.wordfightmobile
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -31,7 +32,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -51,15 +51,21 @@ import com.wordfightmobile.ui.theme.WordfightMobileTheme
 import com.wordfightmobile.viewModels.AuthViewModel
 import com.wordfightmobile.viewModels.GamesViewModel
 import android.net.Uri
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalConfiguration
 import com.wordfightmobile.ui.AcceptFriendAlert
 import com.wordfightmobile.ui.CreateGameAlert
 import com.wordfightmobile.ui.FriendsAlert
 import com.wordfightmobile.ui.TutorialAlert
+import com.wordfightmobile.ui.WordsRow
 import com.wordfightmobile.viewModels.FriendsViewModel
 import com.wordfightmobile.viewModels.OpenAlert
 import com.wordfightmobile.viewModels.TutorialViewModel
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("ConfigurationScreenWidthHeight")
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,6 +113,7 @@ class MainActivity : ComponentActivity() {
                     gamesViewModel.gameId.value != null
                 }
             }
+            val config = LocalConfiguration.current
             LaunchedEffect(Unit) {
                 handleIntents((context as? Activity)?.intent, openGame = { gameId ->
                     gamesViewModel.gameId.value = gameId
@@ -140,7 +147,7 @@ class MainActivity : ComponentActivity() {
                         sheetContent = {
                             GamesSheet(scaffoldState)
                         },
-                        sheetPeekHeight = 220.dp,
+                        sheetPeekHeight = if(config.screenHeightDp.dp > 890.dp) 220.dp else 100.dp,
                         modifier = Modifier.fillMaxSize()) { innerPadding ->
                         when (friendsViewModel.openAlert.value) {
                             OpenAlert.ConfirmFriendship -> AcceptFriendAlert { friendsViewModel.openAlert.value =
@@ -170,16 +177,19 @@ class MainActivity : ComponentActivity() {
 //                                    "Log Out"
 //                                )
 //                            }
-                            Spacer(modifier = Modifier.height(80.dp))
+                            Spacer(modifier = Modifier.height(50.dp))
                             Crossfade(hasGame, animationSpec = tween(4300, delayMillis = 300)) { hasGame ->
                                 if (!hasGame) {
-                                    Column {
+                                    Column(
+                                        modifier = Modifier.verticalScroll(rememberScrollState())
+                                    ) {
                                         Spacer(modifier = Modifier.height(70.dp))
                                         GameGrid(homeGrid, GridSize.Large, clickEnabled = false, user = "user")
                                     }
                                 } else {
                                     gamesViewModel.currentGame.value?.let { currentGame ->
                                         GameScreen(currentGame)
+                                        WordsRow(currentGame.usedWords)
                                     }
                                 }
                             }

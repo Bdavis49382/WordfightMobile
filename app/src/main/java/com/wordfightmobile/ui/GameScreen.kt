@@ -5,9 +5,12 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,6 +50,7 @@ fun GameScreen(game: Game) {
 
     Crossfade(gamesViewModel.currentGame.value?.turn) { turn ->
         Column(
+            modifier = Modifier.verticalScroll(rememberScrollState()),
             horizontalAlignment =  Alignment.CenterHorizontally
         ) {
             val isTurn by remember { derivedStateOf {
@@ -64,12 +68,12 @@ fun GameScreen(game: Game) {
                 )
             }
             GameGrid(game.blocks, GridSize.Large, clickEnabled = isTurn && !game.finished)
-            Text(gamesViewModel.currentWord.joinToString(separator = "", transform = {it.letter.toString()}),
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(10.dp),
-                fontWeight = FontWeight.Bold)
             if (isTurn && !game.finished) {
+                Text(gamesViewModel.currentWord.joinToString(separator = "", transform = {it.letter.toString()}),
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(10.dp),
+                    fontWeight = FontWeight.Bold)
                 Button({
                     gamesViewModel.submitWord {
                         Toast.makeText(context, it, Toast.LENGTH_LONG).show()
@@ -80,7 +84,7 @@ fun GameScreen(game: Game) {
                 }
             } else {
                 if (game.finished) {
-                    Text("Game Over", fontSize = 20.sp)
+                    Text("Game Over", fontSize = 20.sp, modifier = Modifier.padding(top = 5.dp))
                     Button({
                         val index = game.players.indexOf(authViewModel.uid.toString())
                         if (index != -1) {
@@ -92,10 +96,10 @@ fun GameScreen(game: Game) {
                         Text("Rematch")
                     }
                 } else {
-                    Text("Waiting", fontSize = 20.sp)
+                    Text("Waiting", fontSize = 20.sp, modifier = Modifier.padding(top = 5.dp))
                 }
             }
-
+            Spacer(modifier = Modifier.height(80.dp))
         }
 
     }

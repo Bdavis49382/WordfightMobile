@@ -13,6 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.wordfightmobile.data.Game
@@ -58,14 +59,14 @@ fun GameSummary(game: Game,
             lazyListState.animateScrollToItem(0)
         }
     }
-    Row(modifier = modifier.fillMaxWidth(.95f)
+    Row(verticalAlignment = Alignment.CenterVertically,modifier = modifier.fillMaxWidth(.95f)
         .clickable {
         onClick()
     }) {
         Box(modifier = Modifier.fillMaxWidth(.4f)) {
             GameGrid(game.blocks, GridSize.Small, clickEnabled = false, onClick = { onClick()})
         }
-        Column {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Text(if (game.players[0] == authViewModel.uid) game.playerNames[1] else game.playerNames[0])
             if (game.finished) {
                 Text("Game finished " + formatDate(game.lastMove.toInstant()))
