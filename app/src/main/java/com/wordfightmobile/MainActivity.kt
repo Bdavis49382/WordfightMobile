@@ -55,6 +55,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalConfiguration
+import com.google.firebase.messaging.messaging
 import com.wordfightmobile.ui.AcceptFriendAlert
 import com.wordfightmobile.ui.CreateGameAlert
 import com.wordfightmobile.ui.FriendsAlert
@@ -123,6 +124,29 @@ class MainActivity : ComponentActivity() {
                 }
                 if (authViewModel.checkLogin()) {
                     gamesViewModel.getGames()
+                    val prefs = getSharedPreferences("fcm",MODE_PRIVATE)
+                    val token = prefs.getString("pendingFCMToken", null)
+                    val auth = Firebase.auth
+
+                    auth.uid?.let { uid ->
+                        val db = Firebase.firestore
+                        if (token != null) {
+                                val img = auth.currentUser?.photoUrl
+                                db.collection("users").document(uid).update(
+                                    mapOf("FCMToken" to token,"img" to img))
+                        } else {
+                            // Temporary to fix users that missed getting images and tokens added
+                            db.collection("users").document(uid).get().addOnCompleteListener { task ->
+                                val storedToken = task.result.data?.get("FCMToken")
+                                if (storedToken == null) {
+                                    val img = auth.currentUser?.photoUrl
+                                    val firebaseToken = Firebase.messaging.token
+                                    db.collection("users").document(uid).update(
+                                        mapOf("FCMToken" to firebaseToken,"img" to img))
+                                }
+                            }
+                        }
+                    }
                 } else {
                     authViewModel.login(scope, credentialManager, context) {
                         gamesViewModel.getGames()

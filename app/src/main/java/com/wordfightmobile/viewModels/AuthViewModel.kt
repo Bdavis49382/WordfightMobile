@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import com.wordfightmobile.R
 import kotlinx.coroutines.CoroutineScope
@@ -91,12 +92,9 @@ class AuthViewModel: ViewModel() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    db.collection("users").document(task.result.user?.uid.toString()).get().addOnCompleteListener { result ->
-                        if (result.isSuccessful && result.result.data == null) {
-                            Log.e("user","no users found for that id")
-                            db.collection("users").document(task.result.user?.uid.toString()).set(mapOf("name" to auth.currentUser?.displayName))
-                        }
-                    }
+                    // the merge option makes it so that if the document already exists, nothing will change.
+                    db.collection("users").document(task.result.user?.uid.toString()).set(mapOf("name" to auth.currentUser?.displayName),
+                        SetOptions.merge())
                     uid = task.result.user?.uid
                     after()
                 }

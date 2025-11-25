@@ -13,8 +13,8 @@ android {
         applicationId = "com.wordfightmobile"
         minSdk = 26
         targetSdk = 35
-        versionCode = 7
-        versionName = "Internal 7"
+        versionCode = 8
+        versionName = "Internal 8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
